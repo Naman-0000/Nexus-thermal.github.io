@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import Engine3D from './Engine3D';
 import PVGraph from './PVGraph';
 
