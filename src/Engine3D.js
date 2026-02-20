@@ -5,7 +5,7 @@ import * as THREE from 'three';
 
 function GasCloud({ thot, isMelted }) {
   const points = useRef();
-  const count = 1500; // High density restored
+  const count = 1500;
 
   const [coords, colors] = useMemo(() => {
     const p = new Float32Array(count * 3);
@@ -16,7 +16,9 @@ function GasCloud({ thot, isMelted }) {
       p[i * 3 + 1] = Math.random() * 5;
       p[i * 3 + 2] = (Math.random() - 0.5) * 2.2;
       color.set(thot > 2200 ? "#ff8800" : "#3498db");
-      c[i * 3] = color.r; c[i * 3 + 1] = color.g; c[i * 3 + 2] = color.b;
+      c[i * 3] = color.r; 
+      c[i * 3 + 1] = color.g; 
+      c[i * 3 + 2] = color.b;
     }
     return [p, c];
   }, [thot]);
@@ -49,22 +51,49 @@ function Assembly({ efficiency, thot, material, viewMode, isMelted }) {
     const speed = (efficiency / 100) * 12;
     const yPos = Math.sin(t * speed) * 1.6;
     if (piston.current) piston.current.position.y = yPos + 2.5;
+    // Vibration effect for high heat
     if (group.current) group.current.position.x = (thot > 2500) ? (Math.random() - 0.5) * 0.04 : 0;
   });
+
+  const barColor = isMelted ? "#ff3b30" : (material === 'Ceramic' ? "#e5e7eb" : "#4b5563");
 
   return (
     <group ref={group}>
       {viewMode === 'gas' ? (
         <GasCloud thot={thot} isMelted={isMelted} />
       ) : (
-        <mesh ref={piston} castShadow>
-          <cylinderGeometry args={[1, 1, 1.4, 32]} />
-          <meshStandardMaterial 
-            color={isMelted ? "#ff3b30" : (material === 'Ceramic' ? "#fdfcf0" : "#94a3b8")} 
-            metalness={0.7} roughness={0.2}
-          />
-        </mesh>
+        <>
+          {/* THE PISTON */}
+          <mesh ref={piston} castShadow>
+            <cylinderGeometry args={[1, 1, 1.4, 32]} />
+            <meshStandardMaterial 
+              color={isMelted ? "#ff3b30" : (material === 'Ceramic' ? "#fdfcf0" : "#94a3b8")} 
+              metalness={0.7} 
+              roughness={0.2}
+            />
+          </mesh>
+
+          {/* STRUCTURAL BARS */}
+          <mesh position={[2, 1.8, 2]} castShadow>
+            <cylinderGeometry args={[0.1, 0.1, 6, 16]} />
+            <meshStandardMaterial color={barColor} metalness={0.8} roughness={0.1} />
+          </mesh>
+          <mesh position={[-2, 1.8, 2]} castShadow>
+            <cylinderGeometry args={[0.1, 0.1, 6, 16]} />
+            <meshStandardMaterial color={barColor} metalness={0.8} roughness={0.1} />
+          </mesh>
+          <mesh position={[2, 1.8, -2]} castShadow>
+            <cylinderGeometry args={[0.1, 0.1, 6, 16]} />
+            <meshStandardMaterial color={barColor} metalness={0.8} roughness={0.1} />
+          </mesh>
+          <mesh position={[-2, 1.8, -2]} castShadow>
+            <cylinderGeometry args={[0.1, 0.1, 6, 16]} />
+            <meshStandardMaterial color={barColor} metalness={0.8} roughness={0.1} />
+          </mesh>
+        </>
       )}
+
+      {/* BASE PLATE */}
       <mesh position={[0, -1.2, 0]} receiveShadow>
         <boxGeometry args={[8, 0.4, 6]} />
         <meshStandardMaterial color="#f2f2f2" />
