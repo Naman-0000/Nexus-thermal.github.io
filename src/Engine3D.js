@@ -3,6 +3,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Environment, ContactShadows } from '@react-three/drei';
 import * as THREE from 'three';
 
+// 1. THE GAS CLOUD (Kept exactly the same)
 function GasCloud({ thot, isMelted }) {
   const points = useRef();
   const count = 1500;
@@ -41,8 +42,11 @@ function GasCloud({ thot, isMelted }) {
   );
 }
 
+// 2. THE MECHANICAL ASSEMBLY (Piston + Moving Rods + Static Pillars)
 function Assembly({ efficiency, thot, material, viewMode, isMelted }) {
   const piston = useRef();
+  const rodA = useRef();
+  const rodB = useRef();
   const group = useRef();
   
   useFrame((state) => {
@@ -50,7 +54,15 @@ function Assembly({ efficiency, thot, material, viewMode, isMelted }) {
     const t = state.clock.getElapsedTime();
     const speed = (efficiency / 100) * 12;
     const yPos = Math.sin(t * speed) * 1.6;
+    
+    // Piston movement
     if (piston.current) piston.current.position.y = yPos + 2.5;
+    
+    // Rod movement (SYNCED WITH PISTON)
+    if (rodA.current) rodA.current.position.y = yPos + 0.5;
+    if (rodB.current) rodB.current.position.y = yPos + 0.5;
+
+    // Heat vibration
     if (group.current) group.current.position.x = (thot > 2500) ? (Math.random() - 0.5) * 0.04 : 0;
   });
 
@@ -62,7 +74,7 @@ function Assembly({ efficiency, thot, material, viewMode, isMelted }) {
         <GasCloud thot={thot} isMelted={isMelted} />
       ) : (
         <>
-          {/* THE PISTON */}
+          {/* MAIN PISTON HEAD */}
           <mesh ref={piston} castShadow>
             <cylinderGeometry args={[1, 1, 1.4, 32]} />
             <meshStandardMaterial 
@@ -72,27 +84,29 @@ function Assembly({ efficiency, thot, material, viewMode, isMelted }) {
             />
           </mesh>
 
-          {/* STRUCTURAL PILLARS - Thickened radius to 0.3 for a solid look */}
+          {/* MOVING CONNECTING RODS (Inside) */}
+          <mesh ref={rodA} position={[0.6, 0.5, 0]} castShadow>
+            <cylinderGeometry args={[0.12, 0.12, 4.5, 16]} />
+            <meshStandardMaterial color={barColor} metalness={0.9} />
+          </mesh>
+          <mesh ref={rodB} position={[-0.6, 0.5, 0]} castShadow>
+            <cylinderGeometry args={[0.12, 0.12, 4.5, 16]} />
+            <meshStandardMaterial color={barColor} metalness={0.9} />
+          </mesh>
+
+          {/* STATIC SUPPORT PILLARS (Outside) */}
           <mesh position={[2.5, 0.8, 2.5]} castShadow>
-            <cylinderGeometry args={[0.3, 0.3, 4, 16]} />
-            <meshStandardMaterial color={barColor} metalness={0.6} roughness={0.3} />
-          </mesh>
-          <mesh position={[-2.5, 0.8, 2.5]} castShadow>
-            <cylinderGeometry args={[0.3, 0.3, 4, 16]} />
-            <meshStandardMaterial color={barColor} metalness={0.6} roughness={0.3} />
-          </mesh>
-          <mesh position={[2.5, 0.8, -2.5]} castShadow>
-            <cylinderGeometry args={[0.3, 0.3, 4, 16]} />
-            <meshStandardMaterial color={barColor} metalness={0.6} roughness={0.3} />
+            <cylinderGeometry args={[0.25, 0.25, 5, 16]} />
+            <meshStandardMaterial color={barColor} metalness={0.4} roughness={0.5} />
           </mesh>
           <mesh position={[-2.5, 0.8, -2.5]} castShadow>
-            <cylinderGeometry args={[0.3, 0.3, 4, 16]} />
-            <meshStandardMaterial color={barColor} metalness={0.6} roughness={0.3} />
+            <cylinderGeometry args={[0.25, 0.25, 5, 16]} />
+            <meshStandardMaterial color={barColor} metalness={0.4} roughness={0.5} />
           </mesh>
         </>
       )}
 
-      {/* BASE PLATE - Widened to support the new pillar layout */}
+      {/* SOLID BASE PLATE */}
       <mesh position={[0, -1.2, 0]} receiveShadow>
         <boxGeometry args={[8, 0.4, 8]} />
         <meshStandardMaterial color="#f2f2f2" />
@@ -101,6 +115,7 @@ function Assembly({ efficiency, thot, material, viewMode, isMelted }) {
   );
 }
 
+// 3. MAIN CANVAS EXPORT
 export default function Engine3D(props) {
   return (
     <Canvas shadows camera={{ position: [10, 8, 10], fov: 35 }} gl={{ antialias: true, alpha: true }}>
