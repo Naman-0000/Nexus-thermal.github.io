@@ -51,11 +51,10 @@ function Assembly({ efficiency, thot, material, viewMode, isMelted }) {
     const speed = (efficiency / 100) * 12;
     const yPos = Math.sin(t * speed) * 1.6;
     if (piston.current) piston.current.position.y = yPos + 2.5;
-    // Vibration effect for high heat
     if (group.current) group.current.position.x = (thot > 2500) ? (Math.random() - 0.5) * 0.04 : 0;
   });
 
-  const barColor = isMelted ? "#ff3b30" : (material === 'Ceramic' ? "#e5e7eb" : "#4b5563");
+  const barColor = isMelted ? "#ff3b30" : (material === 'Ceramic' ? "#e5e7eb" : "#adb5bd");
 
   return (
     <group ref={group}>
@@ -73,29 +72,29 @@ function Assembly({ efficiency, thot, material, viewMode, isMelted }) {
             />
           </mesh>
 
-          {/* STRUCTURAL BARS */}
-          <mesh position={[2, 1.8, 2]} castShadow>
-            <cylinderGeometry args={[0.1, 0.1, 6, 16]} />
-            <meshStandardMaterial color={barColor} metalness={0.8} roughness={0.1} />
+          {/* STRUCTURAL PILLARS - Thickened radius to 0.3 for a solid look */}
+          <mesh position={[2.5, 0.8, 2.5]} castShadow>
+            <cylinderGeometry args={[0.3, 0.3, 4, 16]} />
+            <meshStandardMaterial color={barColor} metalness={0.6} roughness={0.3} />
           </mesh>
-          <mesh position={[-2, 1.8, 2]} castShadow>
-            <cylinderGeometry args={[0.1, 0.1, 6, 16]} />
-            <meshStandardMaterial color={barColor} metalness={0.8} roughness={0.1} />
+          <mesh position={[-2.5, 0.8, 2.5]} castShadow>
+            <cylinderGeometry args={[0.3, 0.3, 4, 16]} />
+            <meshStandardMaterial color={barColor} metalness={0.6} roughness={0.3} />
           </mesh>
-          <mesh position={[2, 1.8, -2]} castShadow>
-            <cylinderGeometry args={[0.1, 0.1, 6, 16]} />
-            <meshStandardMaterial color={barColor} metalness={0.8} roughness={0.1} />
+          <mesh position={[2.5, 0.8, -2.5]} castShadow>
+            <cylinderGeometry args={[0.3, 0.3, 4, 16]} />
+            <meshStandardMaterial color={barColor} metalness={0.6} roughness={0.3} />
           </mesh>
-          <mesh position={[-2, 1.8, -2]} castShadow>
-            <cylinderGeometry args={[0.1, 0.1, 6, 16]} />
-            <meshStandardMaterial color={barColor} metalness={0.8} roughness={0.1} />
+          <mesh position={[-2.5, 0.8, -2.5]} castShadow>
+            <cylinderGeometry args={[0.3, 0.3, 4, 16]} />
+            <meshStandardMaterial color={barColor} metalness={0.6} roughness={0.3} />
           </mesh>
         </>
       )}
 
-      {/* BASE PLATE */}
+      {/* BASE PLATE - Widened to support the new pillar layout */}
       <mesh position={[0, -1.2, 0]} receiveShadow>
-        <boxGeometry args={[8, 0.4, 6]} />
+        <boxGeometry args={[8, 0.4, 8]} />
         <meshStandardMaterial color="#f2f2f2" />
       </mesh>
     </group>
@@ -104,7 +103,7 @@ function Assembly({ efficiency, thot, material, viewMode, isMelted }) {
 
 export default function Engine3D(props) {
   return (
-    <Canvas shadows camera={{ position: [12, 8, 12], fov: 38 }} gl={{ antialias: true, alpha: true }}>
+    <Canvas shadows camera={{ position: [10, 8, 10], fov: 35 }} gl={{ antialias: true, alpha: true }}>
       <color attach="background" args={['#fcfcfc']} />
       <Environment preset="studio" />
       <ambientLight intensity={0.7} />
